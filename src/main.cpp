@@ -1,5 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include <sstream>
 
 using namespace sf;
 
@@ -77,8 +78,35 @@ int main()
     float beeSpeed = 0.0f;
 
 
+    // Choose a font
+    Font font;
+    font.openFromFile("fonts/KOMIKAP_.ttf");
+
+
+    // Set up the message text
+    Text messageText(font);
+    messageText.setString("Press Enter to Start");
+    messageText.setCharacterSize(75); // Character size in pixels
+    messageText.setFillColor(Color::White);
+    messageText.setStyle(Text::Bold);
+    messageText.setPosition({1920 / 2 - 350, 1080 / 2 - 50}); // Centered position
+
+
+    // Set up the score text
+    int score = 0;
+    Text scoreText(font);
+    scoreText.setString("Score: 0");
+    scoreText.setCharacterSize(100);
+    scoreText.setFillColor(Color::White);
+    scoreText.setPosition({20, 20}); // Top-left corner
+
+
     // Variables to control time itself
     Clock clock;
+
+
+    // Track whether the game is running
+    bool paused = true;
 
 
     while (window.isOpen())
@@ -91,92 +119,116 @@ int main()
             }
         }
 
+        if (Keyboard::isKeyPressed(Keyboard::Key::Escape)) {
+            window.close();
+        }
+
+
+        // Start the game
+        if (Keyboard::isKeyPressed(Keyboard::Key::Enter)) {
+            paused = false;
+        }
+
+        if (Keyboard::isKeyPressed(Keyboard::Key::Space)) {
+            paused = true;
+        }
+
         window.clear();
 
-        // Measure time
-        Time dt = clock.restart();
+        if (!paused) {
+            // Measure time
+            Time dt = clock.restart();
 
 
-        // Setup the cloud1
-        if(!cloud1Active) {
-            srand((int)time(0) * 10);
-            cloud1Speed = (rand() % 200) + 25;
+            // Setup the cloud1
+            if(!cloud1Active) {
+                srand((int)time(0) * 10);
+                cloud1Speed = (rand() % 200) + 25;
 
-            // How high is the cloud
-            srand((int)time(0) * 10);
-            float height = (rand() % 450) - 150;
-            spriteCloud1.setPosition({-200, height});
-            cloud1Active = true;
+                // How high is the cloud
+                srand((int)time(0) * 10);
+                float height = (rand() % 450) - 150;
+                spriteCloud1.setPosition({-200, height});
+                cloud1Active = true;
 
-        } else {
-            spriteCloud1.setPosition({spriteCloud1.getPosition().x + (cloud1Speed * dt.asSeconds()), spriteCloud1.getPosition().y});
+            } else {
+                spriteCloud1.setPosition({spriteCloud1.getPosition().x + (cloud1Speed * dt.asSeconds()), spriteCloud1.getPosition().y});
 
-            // Has the cloud reached the right hand edge of the screen?
-            if (spriteCloud1.getPosition().x > 1920) {
-                cloud1Active = false;
+                // Has the cloud reached the right hand edge of the screen?
+                if (spriteCloud1.getPosition().x > 1920) {
+                    cloud1Active = false;
+                }
             }
-        }
 
-        // Setup the cloud2
-        if(!cloud2Active) {
-            srand((int)time(0) * 20);
-            cloud2Speed = (rand() % 200) + 25;
+            // Setup the cloud2
+            if(!cloud2Active) {
+                srand((int)time(0) * 20);
+                cloud2Speed = (rand() % 200) + 25;
 
-            // How high is the cloud
-            srand((int)time(0) * 10);
-            float height = (rand() % 300) - 150;
-            spriteCloud2.setPosition({-200, height});
-            cloud2Active = true;
+                // How high is the cloud
+                srand((int)time(0) * 10);
+                float height = (rand() % 300) - 150;
+                spriteCloud2.setPosition({-200, height});
+                cloud2Active = true;
 
-        } else {
-            spriteCloud2.setPosition({spriteCloud2.getPosition().x + (cloud2Speed * dt.asSeconds()), spriteCloud2.getPosition().y});
+            } else {
+                spriteCloud2.setPosition({spriteCloud2.getPosition().x + (cloud2Speed * dt.asSeconds()), spriteCloud2.getPosition().y});
 
-            // Has the cloud reached the right hand edge of the screen?
-            if (spriteCloud2.getPosition().x > 1920) {
-                cloud2Active = false;
+                // Has the cloud reached the right hand edge of the screen?
+                if (spriteCloud2.getPosition().x > 1920) {
+                    cloud2Active = false;
+                }
             }
-        }
 
-        // Setup the cloud3
-        if(!cloud3Active) {
-            srand((int)time(0) * 30);
-            cloud3Speed = (rand() % 200) + 25;
+            // Setup the cloud3
+            if(!cloud3Active) {
+                srand((int)time(0) * 30);
+                cloud3Speed = (rand() % 200) + 25;
 
-            // How high is the cloud
-            srand((int)time(0) * 10);
-            float height = (rand() % 450) - 150;
-            spriteCloud3.setPosition({-200, height});
-            cloud3Active = true;
+                // How high is the cloud
+                srand((int)time(0) * 10);
+                float height = (rand() % 450) - 150;
+                spriteCloud3.setPosition({-200, height});
+                cloud3Active = true;
 
-        } else {
-            spriteCloud3.setPosition({spriteCloud3.getPosition().x + (cloud3Speed * dt.asSeconds()), spriteCloud3.getPosition().y});
+            } else {
+                spriteCloud3.setPosition({spriteCloud3.getPosition().x + (cloud3Speed * dt.asSeconds()), spriteCloud3.getPosition().y});
 
-            // Has the cloud reached the right hand edge of the screen?
-            if (spriteCloud3.getPosition().x > 1920) {
-                cloud3Active = false;
+                // Has the cloud reached the right hand edge of the screen?
+                if (spriteCloud3.getPosition().x > 1920) {
+                    cloud3Active = false;
+                }
             }
-        }
 
 
-        // Setup the bee
-        if (!beeActive) {
-            srand((int)time(0) * 10);
-            beeSpeed = (rand() % 200) + 200;
+            // Setup the bee
+            if (!beeActive) {
+                srand((int)time(0) * 10);
+                beeSpeed = (rand() % 200) + 200;
 
 
-            // How high is the bee
-            srand((int)time(0) * 10);
-            float height = (rand() % 500) + 500;
-            spriteBee.setPosition({2000, height});
-            beeActive = true;
+                // How high is the bee
+                srand((int)time(0) * 10);
+                float height = (rand() % 500) + 500;
+                spriteBee.setPosition({2000, height});
+                beeActive = true;
 
-        } else {
-            spriteBee.setPosition({spriteBee.getPosition().x - (beeSpeed * dt.asSeconds()), spriteBee.getPosition().y});
+            } else {
+                spriteBee.setPosition({spriteBee.getPosition().x - (beeSpeed * dt.asSeconds()), spriteBee.getPosition().y});
 
-            // Has the bee reached the left hand edge of the screen?
-            if (spriteBee.getPosition().x < -100) {
-                beeActive = false;
+                // Has the bee reached the left hand edge of the screen?
+                if (spriteBee.getPosition().x < -100) {
+                    beeActive = false;
+                }
             }
+
+
+            // Update the score text
+            std::stringstream ss;
+            ss << "Score: " << score;
+            scoreText.setString(ss.str());
+
+
         }
 
         // Draw the spriteBackground
@@ -192,6 +244,13 @@ int main()
 
         // Draw the spriteBee
         window.draw(spriteBee);
+        
+        // Draw the score
+        window.draw(scoreText);
+        if (paused) {
+            // Draw our message
+            window.draw(messageText);
+        }
 
         window.display();
     }
