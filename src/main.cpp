@@ -4,6 +4,63 @@
 
 using namespace sf;
 
+
+// Functions
+void centerMessageText(Text& messageText, float windowWidth, float windowHeight) {
+    // Reposition the text based on its new size
+    FloatRect textRect = messageText.getLocalBounds();
+    messageText.setOrigin({
+        textRect.position.x + textRect.size.x / 2.0f, // x position
+        textRect.position.y + textRect.size.y / 2.0f  // y position
+    });
+    messageText.setPosition({1920 / 2.0f, 1080 / 2.0f}); // Center on screen
+}
+
+
+void newGame(int& score, float& timeRemaining, bool& paused, bool& gameOver, bool& beeActive, bool& cloud1Active, bool& cloud2Active, bool& cloud3Active, Text& messageText, RectangleShape& timeBar, const float timeBarStartWidth, const float timeBarHeight) {
+    // Reset game variables
+    score = 0;
+    timeRemaining = 5.0f;
+    beeActive = false;
+    cloud1Active = false;
+    cloud2Active = false;
+    cloud3Active = false;
+
+    // Reset the message text
+    messageText.setString("Press Enter to Start");
+    centerMessageText(messageText, 1920, 1080);
+
+    // Reset the time bar
+    timeBar.setSize(Vector2f(timeBarStartWidth, timeBarHeight));
+
+    // Unpause and reset the game state
+    paused = false;
+    gameOver = false;
+}
+
+
+void togglePauseGame(bool& paused, Clock& clock) {
+    paused = !paused;
+    clock.restart();
+}
+
+
+void stopGame(bool& paused, Text& messageText) {
+    // Pause the game
+    paused = true;
+
+    // Change the message to show "Game Over" or any other text
+    messageText.setString("Game Over! Press R to Restart or Escape to Exit");
+
+    centerMessageText(messageText, 1920, 1080);
+}
+
+
+void exitGame(RenderWindow& window) {
+    // Close the game window
+    window.close();
+}
+
 int main()
 {
     RenderWindow window(VideoMode({1920, 1080}), "SFML 3 - Timber");
@@ -104,44 +161,72 @@ int main()
     // Variables to control time itself
     Clock clock;
 
+    // Timebar
+    RectangleShape timeBar;
+    float timeBarStartWidth = 400;
+    float timeBarHeight = 80;
+    timeBar.setSize(Vector2f(timeBarStartWidth, timeBarHeight));
+    timeBar.setFillColor(Color::Red);
+    timeBar.setPosition({(1920/2) - timeBarStartWidth / 2, 980});
+
+    Time gameTimeTotal;
+    float timeRemaining = 6.0f;
+    float timeBarWidthPerSecond = timeBarStartWidth / timeRemaining;
+
 
     // Track whether the game is running
     bool paused = true;
+    bool gameOver = true;
 
 
     while (window.isOpen())
     {
         while (const std::optional event = window.pollEvent())
         {
-            if (event->is<sf::Event::Closed>())
-            {
+            if (event->is<sf::Event::Closed>()) {
                 window.close();
+            }
+
+            if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
+                // Toggle pause with Escape key
+                if (keyPressed->scancode == sf::Keyboard::Scancode::Space) {
+                    togglePauseGame(paused, clock);
+                }
+
+
+                if (keyPressed->scancode == sf::Keyboard::Scancode::Enter && gameOver) {
+                    newGame(score, timeRemaining, paused, gameOver, beeActive, cloud1Active, cloud2Active, cloud3Active, messageText, timeBar, timeBarStartWidth, timeBarHeight);
+                }
             }
         }
 
+
+        // Exit the game
         if (Keyboard::isKeyPressed(Keyboard::Key::Escape)) {
-            window.close();
+            exitGame(window);
         }
 
 
-        // Start the game
-        if (Keyboard::isKeyPressed(Keyboard::Key::Enter)) {
-            paused = false;
-        }
-
-        if (Keyboard::isKeyPressed(Keyboard::Key::Space)) {
-            paused = true;
-        }
-
-        window.clear();
-
-        if (!paused) {
+        if (!paused && !gameOver) {
             // Measure time
             Time dt = clock.restart();
 
+            // Subtract from the amount of time remaining
+            timeRemaining -= dt.asSeconds();
+            // Size up the time bar
+            timeBar.setSize(Vector2f(timeBarWidthPerSecond * timeRemaining, timeBarHeight));
+
+            if (timeRemaining <= 0.0f) {
+                stopGame(paused, messageText);
+
+                if (Keyboard::isKeyPressed(Keyboard::Key::R)) {
+                    newGame(score, timeRemaining, paused, gameOver, beeActive, cloud1Active, cloud2Active, cloud3Active, messageText, timeBar, timeBarStartWidth, timeBarHeight);
+                }
+            }
+
 
             // Setup the cloud1
-            if(!cloud1Active) {
+            if (!cloud1Active) {
                 srand((int)time(0) * 10);
                 cloud1Speed = (rand() % 200) + 25;
 
@@ -247,6 +332,10 @@ int main()
         
         // Draw the score
         window.draw(scoreText);
+
+        // Draw the timebar
+        window.draw(timeBar);
+
         if (paused) {
             // Draw our message
             window.draw(messageText);
