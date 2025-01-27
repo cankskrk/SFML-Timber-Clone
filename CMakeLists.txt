@@ -12,21 +12,28 @@ FetchContent_Declare(SFML
     SYSTEM)
 FetchContent_MakeAvailable(SFML)
 
-add_executable(main src/main.cpp)
-target_compile_features(main PRIVATE cxx_std_17)
-target_link_libraries(main PRIVATE SFML::Graphics)
-
+# Add executable and link required libraries
+add_executable(timber src/Timber.cpp)
+target_compile_features(timber PRIVATE cxx_std_17)
+target_link_libraries(timber PRIVATE SFML::Graphics SFML::Audio) # Add SFML::Audio here
 
 # Copy the graphics folder to the output directory
 add_custom_command(
-    TARGET main POST_BUILD
+    TARGET timber POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_SOURCE_DIR}/graphics $<TARGET_FILE_DIR:main>/graphics
+    ${CMAKE_SOURCE_DIR}/graphics $<TARGET_FILE_DIR:timber>/graphics
 )
 
 # Copy the fonts folder to the output directory
 add_custom_command(
-    TARGET main POST_BUILD
+    TARGET timber POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_SOURCE_DIR}/graphics $<TARGET_FILE_DIR:main>/fonts
+    ${CMAKE_SOURCE_DIR}/fonts $<TARGET_FILE_DIR:timber>/fonts
+)
+
+# Copy the sound folder to the output directory
+add_custom_command(
+    TARGET timber POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_SOURCE_DIR}/sound $<TARGET_FILE_DIR:timber>/sound
 )
